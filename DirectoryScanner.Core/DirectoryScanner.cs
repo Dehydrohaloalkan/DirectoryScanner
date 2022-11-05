@@ -1,6 +1,6 @@
 ﻿namespace DirectoryScanner.Core
 {
-    public class Class1
+    public class DirectoryScanner
     {
 
     }
