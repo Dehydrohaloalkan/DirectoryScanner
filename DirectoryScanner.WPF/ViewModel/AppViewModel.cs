@@ -1,8 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DirectoryScanner.WPF.Command;
 using System.Windows.Forms;
+using DirectoryScanner.WPF.Model;
 
 namespace DirectoryScanner.WPF.ViewModel;
 
@@ -37,9 +39,9 @@ public class AppViewModel : INotifyPropertyChanged
         }
     }
 
-    private Core.Model.DirectoryTree _tree;
+    private ModelTree _tree;
 
-    public Core.Model.DirectoryTree Tree
+    public ModelTree Tree
     {
         get => _tree;
         set
@@ -79,14 +81,28 @@ public class AppViewModel : INotifyPropertyChanged
                 IsScanning = true;
                 _directoryScanner.Start(Path);
                 IsScanning = false;
-                Tree = _directoryScanner.GetResult();
+                var directoryTree = _directoryScanner.GetResult();
+                Tree = new ModelTree()
+                {
+                    Children = new List<ModelTree>()
+                    {
+                        new(directoryTree)
+                    }
+                };
             });
         }, _ => Path != null && !IsScanning);
         
         StopCommand = new RelayCommand(_ =>
         {
-            Tree = _directoryScanner.Stop();
+            var directoryTree = _directoryScanner.Stop();
             IsScanning = false;
+            Tree = new ModelTree()
+            {
+                Children = new List<ModelTree>()
+                {
+                    new(directoryTree)
+                }
+            };
         }, _ => IsScanning);
     }
 
