@@ -18,7 +18,7 @@ public class ModelTree
         Size = tree.Size;
         Percent = tree.Percent;
         Icon = tree.IsDirectory ? "Icons/folder.png" : "Icons/file.png";
-        Children = tree.Childrens.Select(c => new ModelTree(c)).ToList();
+        Children = tree.Childrens?.Select(c => new ModelTree(c)).ToList();
     }
 
     public ModelTree()

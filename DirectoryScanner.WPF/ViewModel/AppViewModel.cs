@@ -27,7 +27,7 @@ public class AppViewModel : INotifyPropertyChanged
         }
     }
 
-    private ushort _maxThreadCount;
+    private ushort _maxThreadCount = 10;
 
     public ushort MaxThreadCount
     {
@@ -51,7 +51,7 @@ public class AppViewModel : INotifyPropertyChanged
         }
     }
 
-    private volatile bool _isScanning = false;
+    private bool _isScanning;
     public bool IsScanning
     {
         get => _isScanning;
@@ -75,12 +75,11 @@ public class AppViewModel : INotifyPropertyChanged
         
         StartCommand = new RelayCommand(_ =>
         {
+            IsScanning = true;
             Task.Run(() =>
             {
                 _directoryScanner = new Core.DirectoryScanner(MaxThreadCount);
-                IsScanning = true;
                 _directoryScanner.Start(Path);
-                IsScanning = false;
                 var directoryTree = _directoryScanner.GetResult();
                 Tree = new ModelTree()
                 {
@@ -89,6 +88,7 @@ public class AppViewModel : INotifyPropertyChanged
                         new(directoryTree)
                     }
                 };
+                IsScanning = false;
             });
         }, _ => Path != null && !IsScanning);
         

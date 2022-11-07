@@ -16,6 +16,10 @@
             <Setter Property="Margin" Value="3"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
+        <Style TargetType="TextBlock" x:Key="Style">
+            <Setter Property="FontFamily" Value="JetBrains Mono"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -24,14 +28,26 @@
             <ColumnDefinition Width="*" MinWidth="200"/>
         </Grid.ColumnDefinitions>
 
-        <TreeView Grid.Column="0">
-            
+        <TreeView ItemsSource="{Binding Tree.Children}" BorderThickness="0">
+            <TreeView.ItemTemplate >
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/folder.png" MaxHeight="20"></Image>
+                        <TextBlock Style="{StaticResource Style}" FontWeight="Bold" Text="{Binding Name}"></TextBlock>
+                        <TextBlock Style="{StaticResource Style}" Text="  ("></TextBlock>
+                        <TextBlock Style="{StaticResource Style}" Text="{Binding Size}"></TextBlock>
+                        <TextBlock Style="{StaticResource Style}" Text=" b, "></TextBlock>
+                        <TextBlock Style="{StaticResource Style}" Text="{Binding Percent, StringFormat=N2}"></TextBlock>
+                        <TextBlock Style="{StaticResource Style}" Text="%)"></TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
         </TreeView>
 
         <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch" Background="BlueViolet"></GridSplitter>
 
         <StackPanel Grid.Column="2">
-            <Label Margin="3" FontFamily="JetBrains Mono" FontSize="14" Content="{Binding Path}"/>
+            <TextBlock Style="{StaticResource Style}" Margin="3" Text="{Binding Path}"/>
             <Button Command="{Binding SetDirectoryCommand}">Choose directory</Button>
             <Button Command="{Binding StartCommand}">Start scanning</Button>
             <Button Command="{Binding StopCommand}">Stop scanning</Button>
