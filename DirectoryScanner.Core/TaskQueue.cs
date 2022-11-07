@@ -1,15 +1,18 @@
-﻿using System.Collections.Concurrent;
-
-namespace DirectoryScanner.Core;
+﻿namespace DirectoryScanner.Core;
 
 public class TaskQueue : IDisposable
 {
     private readonly Queue<Action?> _tasks = new();
     private readonly List<Thread> _threads = new();
     private readonly CancellationTokenSource _tokenSource;
+    private ushort _count;
+    private ushort _maxCount;
 
     public TaskQueue(ushort maxCount, CancellationTokenSource tokenSource)
     {
+        _tokenSource = tokenSource;
+        _count = 0;
+        _maxCount = maxCount;
         for (var i = 0; i < maxCount; i++)
         {
             var thread = new Thread(ThreadFunc)
@@ -20,7 +23,6 @@ public class TaskQueue : IDisposable
             _threads.Add(thread);
             thread.Start();
         }
-        _tokenSource = tokenSource;
     }
 
     private void ThreadFunc()
@@ -39,7 +41,7 @@ public class TaskQueue : IDisposable
         }
     }
 
-    private void EnqueueTask(Action? task)
+    public void EnqueueTask(Action? task)
     {
         lock (_tasks)
         {
@@ -52,9 +54,11 @@ public class TaskQueue : IDisposable
     {
         lock (_tasks)
         {
-            while (_tasks.Count == 0)
+            while (_tasks.Count == 0 && !_tokenSource.Token.IsCancellationRequested)
             {
+                _count++;
                 Monitor.Wait(_tasks);
+                _count--;
             }
             try
             {
@@ -65,6 +69,11 @@ public class TaskQueue : IDisposable
                 return null;
             }
         }
+    }
+
+    public void WaitEnd()
+    {
+        while (_count != _maxCount && !_tokenSource.Token.IsCancellationRequested) { }
     }
 
     public void Dispose()
