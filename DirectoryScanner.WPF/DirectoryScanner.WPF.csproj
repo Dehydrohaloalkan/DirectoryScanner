@@ -4,7 +4,16 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
+	<UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DirectoryScanner.Core\DirectoryScanner.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Icons\" />
+  </ItemGroup>
 
 </Project>

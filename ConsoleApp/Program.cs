@@ -1,11 +1,9 @@
 ﻿
 
-var directoryScanner = new DirectoryScanner.Core.DirectoryScanner();
+var directoryScanner = new DirectoryScanner.Core.DirectoryScanner(25);
 
-directoryScanner.Start("C:/", 120);
+directoryScanner.Start("D:/");
 
-directoryScanner.WaitEnd();
-
-var tree = directoryScanner.Tree;
+var tree = directoryScanner.GetResult();
 
 int u = 1;

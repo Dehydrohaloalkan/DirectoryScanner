@@ -4,11 +4,22 @@ namespace DirectoryScanner.Core
 {
     public class DirectoryScanner
     {
-        public DirectoryTree? Tree { get; internal set; }
-        private CancellationTokenSource _tokenSource;
-        private TaskQueue _taskQueue;
+        private DirectoryTree Tree { get; set; }
+        private readonly CancellationTokenSource _tokenSource;
+        private readonly TaskQueue _taskQueue;
 
-        public void Start(string path, ushort maxThreadCount)
+        public DirectoryScanner(ushort maxThreadCount)
+        {
+            if (maxThreadCount <= 0)
+            {
+                throw new ArgumentException($"Max thread count should be greater than 0");
+            }
+            
+            _tokenSource = new CancellationTokenSource();
+            _taskQueue = new TaskQueue(maxThreadCount, _tokenSource);
+        }
+
+        public void Start(string path)
         {
             if (File.Exists(path))
             {
@@ -18,6 +29,7 @@ namespace DirectoryScanner.Core
                     Name = fileInfo.Name,
                     FullName = fileInfo.FullName,
                     Size = fileInfo.Length,
+                    Percent = 100,
                     IsDirectory = false,
                 };
                 return;
@@ -28,30 +40,40 @@ namespace DirectoryScanner.Core
                 throw new ArgumentException($"Directory {path} does not exist");
             }
 
-            if (maxThreadCount <= 0)
-            {
-                throw new ArgumentException($"Max thread count should be greater than 0");
-            }
-
-            _tokenSource = new CancellationTokenSource();
-            _taskQueue = new TaskQueue(maxThreadCount, _tokenSource);
             var directoryInfo = new DirectoryInfo(path);
             Tree = new DirectoryTree()
             {
                 Name = directoryInfo.Name,
                 FullName = directoryInfo.FullName,
                 IsDirectory = true,
+                Percent = 100,
                 Childrens = new List<DirectoryTree>(),
             };
             _taskQueue.EnqueueTask(() => ScanDirectory(Tree));
         }
 
-        public void WaitEnd()
+        public DirectoryTree Stop()
+        {
+            _tokenSource.Cancel();
+            Tree.RecalculateSize();
+            Tree.RecalculatePercents();
+            return Tree;
+        }
+
+        private void WaitEnd()
         {
             _taskQueue.WaitEnd();
         }
 
-        public void ScanDirectory(DirectoryTree node)
+        public DirectoryTree GetResult()
+        {
+            WaitEnd();
+            Tree.RecalculateSize();
+            Tree.RecalculatePercents();
+            return Tree;
+        }
+
+        private void ScanDirectory(DirectoryTree node)
         {
             var directoryInfo = new DirectoryInfo(node.FullName);
             var token = _tokenSource.Token;
