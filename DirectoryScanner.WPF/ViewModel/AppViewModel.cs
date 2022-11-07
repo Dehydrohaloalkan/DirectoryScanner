@@ -55,7 +55,7 @@ public class AppViewModel : INotifyPropertyChanged
     public bool IsScanning
     {
         get => _isScanning;
-        private set
+        set
         {
             _isScanning = value;
             OnPropertyChanged();

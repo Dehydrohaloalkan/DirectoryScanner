@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DirectoryScanner.Core\DirectoryScanner.Core.csproj" />
+    <PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Icons\" />
+    <ProjectReference Include="..\DirectoryScanner.Core\DirectoryScanner.Core.csproj" />
   </ItemGroup>
 
 </Project>
