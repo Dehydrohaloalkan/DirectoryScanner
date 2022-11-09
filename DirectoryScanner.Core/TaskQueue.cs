@@ -6,7 +6,7 @@ public class TaskQueue : IDisposable
     private readonly List<Thread> _threads = new();
     private readonly CancellationTokenSource _tokenSource;
     private ushort _count;
-    private ushort _maxCount;
+    private readonly ushort _maxCount;
 
     public TaskQueue(ushort maxCount, CancellationTokenSource tokenSource)
     {
@@ -79,7 +79,10 @@ public class TaskQueue : IDisposable
     public void Dispose()
     {
         _tokenSource.Cancel();
-        Monitor.PulseAll(_tasks);
+        lock (_tasks)
+        {
+            Monitor.PulseAll(_tasks);
+        }
         foreach (var thread in _threads)
         {
             thread.Join();

@@ -6,7 +6,8 @@ namespace DirectoryScanner.Core
     {
         private DirectoryTree Tree { get; set; }
         private readonly CancellationTokenSource _tokenSource;
-        private readonly TaskQueue _taskQueue;
+        private TaskQueue _taskQueue;
+        private readonly ushort _maxThreadCount;
 
         public DirectoryScanner(ushort maxThreadCount)
         {
@@ -16,7 +17,7 @@ namespace DirectoryScanner.Core
             }
             
             _tokenSource = new CancellationTokenSource();
-            _taskQueue = new TaskQueue(maxThreadCount, _tokenSource);
+            _maxThreadCount = maxThreadCount;
         }
 
         public void Start(string path)
@@ -49,25 +50,21 @@ namespace DirectoryScanner.Core
                 Percent = 100,
                 Childrens = new List<DirectoryTree>(),
             };
+            _taskQueue = new TaskQueue(_maxThreadCount, _tokenSource);
             _taskQueue.EnqueueTask(() => ScanDirectory(Tree));
         }
 
         public DirectoryTree Stop()
         {
-            _tokenSource.Cancel();
+            _taskQueue.Dispose();
             Tree.RecalculateSize();
             Tree.RecalculatePercents();
             return Tree;
         }
 
-        private void WaitEnd()
-        {
-            _taskQueue.WaitEnd();
-        }
-
         public DirectoryTree GetResult()
         {
-            WaitEnd();
+            _taskQueue.WaitEnd();
             Tree.RecalculateSize();
             Tree.RecalculatePercents();
             return Tree;
