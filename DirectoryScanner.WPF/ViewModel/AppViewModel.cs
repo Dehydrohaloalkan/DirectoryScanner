@@ -27,7 +27,7 @@ public class AppViewModel : INotifyPropertyChanged
         }
     }
 
-    private ushort _maxThreadCount = 10;
+    private ushort _maxThreadCount = 50;
 
     public ushort MaxThreadCount
     {

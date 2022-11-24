@@ -13,7 +13,7 @@ namespace DirectoryScanner.Core
         {
             if (maxThreadCount <= 0)
             {
-                throw new ArgumentException($"Max thread count should be greater than 0");
+                throw new ArgumentException("Max thread count should be greater than 0");
             }
             
             _tokenSource = new CancellationTokenSource();
